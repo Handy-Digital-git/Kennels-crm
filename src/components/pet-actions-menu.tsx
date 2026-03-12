@@ -14,7 +14,7 @@ export function PetActionsMenu({ petId, ownerIdentifier }: PetActionsMenuProps) 
         <MoreHorizontal className="h-4 w-4" />
       </summary>
 
-      <div className="absolute right-10 z-20 mt-2 w-[18rem] rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10">
+      <div className="absolute right-10 z-20 mt-2 w-[12rem] rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10">
         <Link
           href={`/pets/${petId}`}
           className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium whitespace-nowrap text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"

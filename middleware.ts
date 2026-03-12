@@ -56,7 +56,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && authRoutes.has(pathname)) {
-    const redirectResponse = NextResponse.redirect(new URL("/", request.url));
+    const redirectResponse = NextResponse.redirect(new URL("/customers", request.url));
     return copyCookies(response, redirectResponse);
   }
 

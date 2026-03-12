@@ -1,6 +1,15 @@
-import { Search } from "lucide-react";
 import { PetActionsMenu } from "@/components/pet-actions-menu";
+import { LiveSearchInput } from "@/components/live-search-input";
+import { PaginationControls } from "@/components/pagination-controls";
 import { getPetListItems } from "@/lib/customer-form-data";
+import { getCurrentPage, paginateItems } from "@/lib/pagination";
+
+type PetsPageProps = {
+  searchParams?: Promise<{
+    q?: string;
+    page?: string;
+  }>;
+};
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-GB", {
@@ -10,8 +19,37 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export default async function PetsPage() {
+function matchesPetQuery(
+  pet: Awaited<ReturnType<typeof getPetListItems>>[number],
+  query: string,
+) {
+  if (!query) {
+    return true;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  return [
+    pet.id,
+    pet.name,
+    pet.breedDescription,
+    pet.ownerName,
+    pet.ownerIdentifier,
+    pet.medications,
+    pet.specialDiet,
+    pet.upcomingStay,
+    pet.status,
+    pet.ageYears ? `${pet.ageYears} years old` : "age not recorded",
+  ].some((value) => value.toLowerCase().includes(normalizedQuery));
+}
+
+export default async function PetsPage({ searchParams }: PetsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const searchQuery = resolvedSearchParams?.q?.trim() ?? "";
+  const requestedPage = getCurrentPage(resolvedSearchParams?.page);
   const pets = await getPetListItems();
+  const filteredPets = pets.filter((pet) => matchesPetQuery(pet, searchQuery));
+  const paginatedPets = paginateItems(filteredPets, requestedPage);
   const petsWithUpcomingStay = pets.filter(
     (pet) => pet.upcomingStay !== "No booking scheduled",
   ).length;
@@ -55,7 +93,7 @@ export default async function PetsPage() {
           </div>
         </div>
 
-        <section className="rounded-4xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-xl font-semibold text-slate-950">Active pet list</h3>
@@ -64,15 +102,10 @@ export default async function PetsPage() {
               </p>
             </div>
 
-            <label className="flex min-w-70 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-              <Search className="h-4 w-4" />
-              <input
-                type="search"
-                placeholder="Search coming next"
-                disabled
-                className="w-full bg-transparent text-slate-700 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
-              />
-            </label>
+            <LiveSearchInput
+              placeholder="Search pets, owners, or care notes"
+              ariaLabel="Search pets, owners, or care notes"
+            />
           </div>
 
           <div className="overflow-x-auto lg:overflow-visible">
@@ -88,7 +121,7 @@ export default async function PetsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white">
-                {pets.map((pet) => (
+                {paginatedPets.pageItems.map((pet) => (
                   <tr key={pet.id} className="align-top transition hover:bg-slate-50/70">
                     <td className="px-6 py-5">
                       <p className="text-sm font-semibold text-slate-950">{pet.name}</p>
@@ -115,9 +148,30 @@ export default async function PetsPage() {
                     </td>
                   </tr>
                 ))}
+                {paginatedPets.totalItems === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-10 text-center">
+                      <p className="text-sm font-semibold text-slate-950">
+                        No pets matched that search.
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Try a pet name, owner, breed, medication, or diet note.
+                      </p>
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
+          <PaginationControls
+            pathname="/pets"
+            currentPage={paginatedPets.currentPage}
+            totalPages={paginatedPets.totalPages}
+            totalItems={paginatedPets.totalItems}
+            startItem={paginatedPets.startItem}
+            endItem={paginatedPets.endItem}
+            searchParams={resolvedSearchParams}
+          />
         </section>
       </section>
     </main>

@@ -1,8 +1,18 @@
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { CustomerActionsMenu } from "@/components/customer-actions-menu";
+import { LiveSearchInput } from "@/components/live-search-input";
+import { PaginationControls } from "@/components/pagination-controls";
 import { customerRecords } from "@/lib/customer-data";
+import { getCurrentPage, paginateItems } from "@/lib/pagination";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+
+type CustomersPageProps = {
+  searchParams?: Promise<{
+    q?: string;
+    page?: string;
+  }>;
+};
 
 type CustomerTableRow = {
   id: string;
@@ -183,8 +193,33 @@ async function getCustomerRows(): Promise<CustomerTableRow[]> {
   }
 }
 
-export default async function CustomersPage() {
+function matchesCustomerQuery(customer: CustomerTableRow, query: string) {
+  if (!query) {
+    return true;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  return [
+    customer.id,
+    customer.customerId,
+    customer.name,
+    customer.email,
+    customer.phone,
+    customer.town,
+    customer.upcomingStay,
+    customer.status,
+    ...customer.boarders,
+  ].some((value) => value.toLowerCase().includes(normalizedQuery));
+}
+
+export default async function CustomersPage({ searchParams }: CustomersPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const searchQuery = resolvedSearchParams?.q?.trim() ?? "";
+  const requestedPage = getCurrentPage(resolvedSearchParams?.page);
   const rows = await getCustomerRows();
+  const filteredRows = rows.filter((customer) => matchesCustomerQuery(customer, searchQuery));
+  const paginatedRows = paginateItems(filteredRows, requestedPage);
   const activeCustomers = rows.filter(
     (customer) => customer.status === "Active",
   ).length;
@@ -250,7 +285,7 @@ export default async function CustomersPage() {
           </div>
         </div>
 
-        <section className="rounded-4xl border border-slate-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-lg font-semibold text-slate-950">
@@ -262,14 +297,10 @@ export default async function CustomersPage() {
             </div>
 
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <label className="flex min-w-70 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
-                <Search className="h-4 w-4" />
-                <input
-                  type="search"
-                  placeholder="Search customers or boarders"
-                  className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                />
-              </label>
+              <LiveSearchInput
+                placeholder="Search customers or boarders"
+                ariaLabel="Search customers or boarders"
+              />
               <Link
                 href="/customers/new"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
@@ -294,7 +325,7 @@ export default async function CustomersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white">
-                {rows.map((customer) => (
+                {paginatedRows.pageItems.map((customer) => (
                   <tr key={customer.id} className="align-top transition hover:bg-slate-50/70">
                     <td className="px-6 py-5">
                       <div>
@@ -365,9 +396,30 @@ export default async function CustomersPage() {
                     </td>
                   </tr>
                 ))}
+                {paginatedRows.totalItems === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-10 text-center">
+                      <p className="text-sm font-semibold text-slate-950">
+                        No customers matched that search.
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Try a customer, boarder, email, phone number, or town.
+                      </p>
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
+          <PaginationControls
+            pathname="/customers"
+            currentPage={paginatedRows.currentPage}
+            totalPages={paginatedRows.totalPages}
+            totalItems={paginatedRows.totalItems}
+            startItem={paginatedRows.startItem}
+            endItem={paginatedRows.endItem}
+            searchParams={resolvedSearchParams}
+          />
         </section>
       </section>
     </main>

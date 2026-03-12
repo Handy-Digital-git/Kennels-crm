@@ -19,7 +19,7 @@ function isPrintRoute(pathname: string | null) {
 
 function getPageTitle(pathname: string | null) {
   if (!pathname || pathname === "/") {
-    return "Dashboard";
+    return "Customers";
   }
 
   const [segment] = pathname.replace(/^\//, "").split("/");

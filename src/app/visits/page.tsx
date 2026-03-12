@@ -1,6 +1,16 @@
 import Link from "next/link";
+import { LiveSearchInput } from "@/components/live-search-input";
+import { PaginationControls } from "@/components/pagination-controls";
 import { VisitActionsMenu } from "@/components/visit-actions-menu";
+import { getCurrentPage, paginateItems } from "@/lib/pagination";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
+
+type VisitsPageProps = {
+  searchParams?: Promise<{
+    q?: string;
+    page?: string;
+  }>;
+};
 
 type VisitRow = {
   id: string;
@@ -92,8 +102,31 @@ async function getVisitRows(): Promise<VisitRow[]> {
   }
 }
 
-export default async function VisitsPage() {
+function matchesVisitQuery(visit: VisitRow, query: string) {
+  if (!query) {
+    return true;
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+
+  return [
+    visit.id,
+    visit.customerName,
+    visit.customerIdentifier,
+    visit.status,
+    visit.arrivalDate,
+    visit.departureDate,
+    formatDateRange(visit.arrivalDate, visit.departureDate),
+  ].some((value) => value.toLowerCase().includes(normalizedQuery));
+}
+
+export default async function VisitsPage({ searchParams }: VisitsPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const searchQuery = resolvedSearchParams?.q?.trim() ?? "";
+  const requestedPage = getCurrentPage(resolvedSearchParams?.page);
   const visits = await getVisitRows();
+  const filteredVisits = visits.filter((visit) => matchesVisitQuery(visit, searchQuery));
+  const paginatedVisits = paginateItems(filteredVisits, requestedPage);
 
   return (
     <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
@@ -110,44 +143,85 @@ export default async function VisitsPage() {
           </p>
         </div>
 
-        <section className="rounded-4xl border border-slate-200 bg-white shadow-sm overflow-x-auto lg:overflow-visible">
-          <table className="min-w-full divide-y divide-slate-200 text-left">
-            <thead className="bg-slate-50/80 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              <tr>
-                <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Visit dates</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Boarders</th>
-                <th className="px-6 py-4">Total</th>
-                <th className="px-6 py-4">Balance</th>
-                <th className="px-6 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
-              {visits.map((visit) => (
-                <tr key={visit.id} className="hover:bg-slate-50/70">
-                  <td className="px-6 py-5">
-                    <p className="text-sm font-semibold text-slate-950">{visit.customerName}</p>
-                    <p className="mt-1 text-sm text-slate-500">{visit.customerIdentifier}</p>
-                  </td>
-                  <td className="px-6 py-5 text-sm text-slate-700">
-                    {formatDateRange(visit.arrivalDate, visit.departureDate)}
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                      {visit.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5 text-sm text-slate-700">{visit.boardersBooked}</td>
-                  <td className="px-6 py-5 text-sm font-semibold text-slate-950">{formatCurrency(visit.totalAmount)}</td>
-                  <td className="px-6 py-5 text-sm font-semibold text-slate-950">{formatCurrency(visit.balanceOwed)}</td>
-                  <td className="px-6 py-5 text-right">
-                    <VisitActionsMenu visitId={visit.id} />
-                  </td>
+        <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-950">
+                Visit table
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Search by customer, visit ID, status, or visit dates.
+              </p>
+            </div>
+
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+              <LiveSearchInput
+                placeholder="Search visits"
+                ariaLabel="Search visits"
+              />
+            </div>
+          </div>
+
+          <div className="overflow-x-auto lg:overflow-visible">
+            <table className="min-w-full divide-y divide-slate-200 text-left">
+              <thead className="bg-slate-50/80 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <tr>
+                  <th className="px-6 py-4">Customer</th>
+                  <th className="px-6 py-4">Visit dates</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Boarders</th>
+                  <th className="px-6 py-4">Total</th>
+                  <th className="px-6 py-4">Balance</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200 bg-white">
+                {paginatedVisits.pageItems.map((visit) => (
+                  <tr key={visit.id} className="hover:bg-slate-50/70">
+                    <td className="px-6 py-5">
+                      <p className="text-sm font-semibold text-slate-950">{visit.customerName}</p>
+                      <p className="mt-1 text-sm text-slate-500">{visit.customerIdentifier}</p>
+                    </td>
+                    <td className="px-6 py-5 text-sm text-slate-700">
+                      {formatDateRange(visit.arrivalDate, visit.departureDate)}
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                        {visit.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 text-sm text-slate-700">{visit.boardersBooked}</td>
+                    <td className="px-6 py-5 text-sm font-semibold text-slate-950">{formatCurrency(visit.totalAmount)}</td>
+                    <td className="px-6 py-5 text-sm font-semibold text-slate-950">{formatCurrency(visit.balanceOwed)}</td>
+                    <td className="px-6 py-5 text-right">
+                      <VisitActionsMenu visitId={visit.id} />
+                    </td>
+                  </tr>
+                ))}
+                {paginatedVisits.totalItems === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-10 text-center">
+                      <p className="text-sm font-semibold text-slate-950">
+                        No visits matched that search.
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Try a customer name, status, visit ID, or clear the filter.
+                      </p>
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+          <PaginationControls
+            pathname="/visits"
+            currentPage={paginatedVisits.currentPage}
+            totalPages={paginatedVisits.totalPages}
+            totalItems={paginatedVisits.totalItems}
+            startItem={paginatedVisits.startItem}
+            endItem={paginatedVisits.endItem}
+            searchParams={resolvedSearchParams}
+          />
         </section>
       </section>
     </main>

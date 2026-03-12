@@ -108,9 +108,9 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
           </div>
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-          <section className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+          <section>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center gap-3">
                   <div className="rounded-2xl bg-slate-100 p-3 text-slate-700">
@@ -203,125 +203,9 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
                 </div>
               </div>
             </div>
-
-            <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-                    Full pet record
-                  </p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                    Identity, health, and care details
-                  </h2>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                <DetailItem label="Pet ID" value={displayPetId} />
-                <DetailItem label="Name" value={pet.name} />
-                <DetailItem label="Breed" value={pet.breedDescription} />
-                <DetailItem
-                  label="Age"
-                  value={pet.ageYears ? `${pet.ageYears} years` : "Not recorded"}
-                />
-                <DetailItem label="Vaccination date" value={pet.vaccinationDate} />
-                <DetailItem label="Kennel cough date" value={pet.kennelCoughDate} />
-                <DetailItem label="Daily rate" value={`${formatCurrency(pet.dailyRate)} / day`} />
-                <DetailItem label="Upcoming stay" value={pet.upcomingStay} />
-                <DetailItem label="Owner" value={pet.ownerName} />
-              </div>
-
-              <div className="mt-8 grid gap-5 md:grid-cols-2">
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Medication
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">{pet.medications}</p>
-                </div>
-
-                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                    Diet
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-700">{pet.specialDiet}</p>
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  General notes
-                </p>
-                <p className="mt-3 text-sm leading-6 text-slate-700">{pet.comments}</p>
-              </div>
-            </section>
-
-            <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
-                    Stay history
-                  </p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                    Previous and upcoming stays
-                  </h2>
-                </div>
-
-                <Link
-                  href={`/customers/${pet.ownerIdentifier}`}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
-                >
-                  <span>Open owner record</span>
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {pet.stayHistory.length > 0 ? (
-                  pet.stayHistory.map((visit) => (
-                    <div
-                      key={visit.visitId}
-                      className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5"
-                    >
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-3">
-                            <h3 className="text-lg font-semibold text-slate-950">
-                              {formatVisitRange(visit.arrivalDate, visit.departureDate)}
-                            </h3>
-                            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
-                              {visit.status}
-                            </span>
-                          </div>
-                          <p className="mt-3 text-sm leading-6 text-slate-600">{visit.comments || "No visit notes recorded."}</p>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-3 lg:min-w-105">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Rate</p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">{formatCurrency(visit.dailyRate)} / day</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Medication</p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">{visit.medications}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Diet</p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">{visit.specialDiet}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
-                    No stay history recorded for this pet yet.
-                  </div>
-                )}
-              </div>
-            </section>
           </section>
 
-          <aside className="space-y-6">
+          <aside className="xl:sticky xl:top-24">
             <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
                 Owner
@@ -359,6 +243,122 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
             </section>
           </aside>
         </div>
+
+        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+                Full pet record
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                Identity, health, and care details
+              </h2>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <DetailItem label="Pet ID" value={displayPetId} />
+            <DetailItem label="Name" value={pet.name} />
+            <DetailItem label="Breed" value={pet.breedDescription} />
+            <DetailItem
+              label="Age"
+              value={pet.ageYears ? `${pet.ageYears} years` : "Not recorded"}
+            />
+            <DetailItem label="Vaccination date" value={pet.vaccinationDate} />
+            <DetailItem label="Kennel cough date" value={pet.kennelCoughDate} />
+            <DetailItem label="Daily rate" value={`${formatCurrency(pet.dailyRate)} / day`} />
+            <DetailItem label="Upcoming stay" value={pet.upcomingStay} />
+            <DetailItem label="Owner" value={pet.ownerName} />
+          </div>
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Medication
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-700">{pet.medications}</p>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Diet
+              </p>
+              <p className="mt-3 text-sm leading-6 text-slate-700">{pet.specialDiet}</p>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              General notes
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-700">{pet.comments}</p>
+          </div>
+        </section>
+
+        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+                Stay history
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
+                Previous and upcoming stays
+              </h2>
+            </div>
+
+            <Link
+              href={`/customers/${pet.ownerIdentifier}`}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
+            >
+              <span>Open owner record</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {pet.stayHistory.length > 0 ? (
+              pet.stayHistory.map((visit) => (
+                <div
+                  key={visit.visitId}
+                  className="rounded-3xl border border-slate-200 bg-slate-50/80 p-5"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3 className="text-lg font-semibold text-slate-950">
+                          {formatVisitRange(visit.arrivalDate, visit.departureDate)}
+                        </h3>
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                          {visit.status}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-600">{visit.comments || "No visit notes recorded."}</p>
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-3 lg:min-w-105">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Rate</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{formatCurrency(visit.dailyRate)} / day</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Medication</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{visit.medications}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Diet</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{visit.specialDiet}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
+                No stay history recorded for this pet yet.
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </main>
   );

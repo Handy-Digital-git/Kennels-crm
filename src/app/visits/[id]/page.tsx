@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { PaginationControls } from "@/components/pagination-controls";
 import { VisitPaymentForm } from "@/components/visit-payment-form";
 import { getVisitDetailRecord } from "@/lib/customer-form-data";
+import { getCurrentPage, paginateItems } from "@/lib/pagination";
 
 type VisitDetailPageProps = {
   params: Promise<{
     id: string;
+  }>;
+  searchParams?: Promise<{
+    page?: string;
   }>;
 };
 
@@ -34,13 +39,17 @@ function formatDateRange(arrivalDate: string, departureDate: string) {
   })}`;
 }
 
-export default async function VisitDetailPage({ params }: VisitDetailPageProps) {
+export default async function VisitDetailPage({ params, searchParams }: VisitDetailPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const requestedPage = getCurrentPage(resolvedSearchParams?.page);
   const visit = await getVisitDetailRecord(id);
 
   if (!visit) {
     notFound();
   }
+
+  const paginatedExtras = paginateItems(visit.extras, requestedPage);
 
   return (
     <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
@@ -126,7 +135,7 @@ export default async function VisitDetailPage({ params }: VisitDetailPageProps) 
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 bg-white">
-                      {visit.extras.map((extra) => (
+                      {paginatedExtras.pageItems.map((extra) => (
                         <tr key={extra.label}>
                           <td className="px-5 py-4 text-slate-700">{extra.label}</td>
                           <td className="px-5 py-4 text-right font-semibold text-slate-950">{formatCurrency(extra.amount)}</td>
@@ -135,6 +144,15 @@ export default async function VisitDetailPage({ params }: VisitDetailPageProps) 
                     </tbody>
                   </table>
                 </div>
+                <PaginationControls
+                  pathname={`/visits/${visit.id}`}
+                  currentPage={paginatedExtras.currentPage}
+                  totalPages={paginatedExtras.totalPages}
+                  totalItems={paginatedExtras.totalItems}
+                  startItem={paginatedExtras.startItem}
+                  endItem={paginatedExtras.endItem}
+                  searchParams={resolvedSearchParams}
+                />
               ) : (
                 <p className="text-sm text-slate-500">No extras recorded for this visit.</p>
               )}

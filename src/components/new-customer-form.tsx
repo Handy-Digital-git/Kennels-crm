@@ -593,7 +593,7 @@ export function NewCustomerForm({
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(340px,420px)]">
+      <div className="space-y-6">
         <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl bg-amber-500 p-3 text-white">

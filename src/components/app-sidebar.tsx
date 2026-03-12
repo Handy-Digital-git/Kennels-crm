@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
   ChevronsLeft,
@@ -45,8 +45,15 @@ const navItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isProfileLoading, setIsProfileLoading] = useState(true);
+
+  useEffect(() => {
+    navItems.forEach((item) => {
+      router.prefetch(item.href);
+    });
+  }, [router]);
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
@@ -140,8 +147,8 @@ export function AppSidebar() {
   return (
     <aside className="flex h-full w-full max-w-xs flex-col border-r border-slate-200 bg-white px-4 py-5">
       <div className="flex items-start justify-between gap-3 px-2">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9  shrink-0 items-center justify-center rounded-2xl bg-blue-400 text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.55)]">
+        <Link href="/customers" className="flex min-w-0 items-center gap-3">
+          <div className="flex h-9 w-9  shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.55)]">
             <Dog className="text-blue-700 h-6.5 w-6.5" strokeWidth={2.2} />
           </div>
           <div className="min-w-0">
@@ -164,7 +171,7 @@ export function AppSidebar() {
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center text-blue-700 justify-center rounded-full bg-slate-900 text-[0.7rem] font-semibold">
+          <div className="flex h-8 w-8 shrink-0 items-center text-blue-700 justify-center rounded-full bg-slate-200 text-[0.7rem] font-semibold">
             {initials}
           </div>
           <div className="min-w-0 flex-1">
@@ -199,6 +206,7 @@ export function AppSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch
               className={[
                 "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive

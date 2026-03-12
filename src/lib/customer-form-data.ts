@@ -56,6 +56,9 @@ export type VisitDetailRecord = {
   boarders: Array<{
     petName: string;
     breedDescription: string;
+    ageYears: number | null;
+    vaccinationDate: string;
+    kennelCoughDate: string;
     dailyRate: number;
     medications: string;
     specialDiet: string;
@@ -698,7 +701,7 @@ export async function getVisitDetailRecord(visitId: string): Promise<VisitDetail
       supabase
         .from("visit_pets")
         .select(
-          "pet_name, breed_description, daily_rate, medications, special_diet, comments",
+          "pet_name, breed_description, age_years, vaccination_date, kennel_cough_date, daily_rate, medications, special_diet, comments",
         )
         .eq("visit_id", visitId),
       supabase
@@ -733,6 +736,9 @@ export async function getVisitDetailRecord(visitId: string): Promise<VisitDetail
       boarders: (visitPets ?? []).map((visitPet) => ({
         petName: visitPet.pet_name,
         breedDescription: visitPet.breed_description ?? "",
+        ageYears: visitPet.age_years ?? null,
+        vaccinationDate: toDateInput(visitPet.vaccination_date),
+        kennelCoughDate: toDateInput(visitPet.kennel_cough_date),
         dailyRate: toNumber(visitPet.daily_rate),
         medications: visitPet.medications ?? "",
         specialDiet: visitPet.special_diet ?? "",
