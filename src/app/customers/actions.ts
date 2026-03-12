@@ -709,3 +709,50 @@ export async function deleteVisit(visitId: string) {
     customerCode: customer?.customer_code ?? null,
   };
 }
+
+export async function deletePet(petId: string) {
+  const authResult = await getAuthedClient();
+
+  if ("error" in authResult) {
+    return authResult;
+  }
+
+  const { supabase } = authResult;
+
+  const { data: pet, error: petError } = await supabase
+    .from("pets")
+    .select("id, customer_id")
+    .eq("id", petId)
+    .maybeSingle();
+
+  if (petError || !pet) {
+    return { error: petError?.message ?? "Pet not found." };
+  }
+
+  const { data: customer } = await supabase
+    .from("customers")
+    .select("customer_code")
+    .eq("id", pet.customer_id)
+    .maybeSingle();
+
+  const { error: deleteError } = await supabase
+    .from("pets")
+    .delete()
+    .eq("id", petId);
+
+  if (deleteError) {
+    return { error: deleteError.message };
+  }
+
+  revalidatePath("/pets");
+  revalidatePath("/customers");
+
+  if (customer?.customer_code) {
+    revalidatePath(`/customers/${customer.customer_code}`);
+  }
+
+  return {
+    success: true as const,
+    customerCode: customer?.customer_code ?? null,
+  };
+}

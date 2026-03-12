@@ -67,6 +67,49 @@ export type VisitDetailRecord = {
   }>;
 };
 
+export type PetListItem = {
+  id: string;
+  name: string;
+  breedDescription: string;
+  ownerName: string;
+  ownerIdentifier: string;
+  ageYears: number | null;
+  medications: string;
+  specialDiet: string;
+  dailyRate: number;
+  upcomingStay: string;
+  status: string;
+};
+
+export type PetDetailRecord = {
+  id: string;
+  name: string;
+  breedDescription: string;
+  ownerName: string;
+  ownerIdentifier: string;
+  ownerPhone: string;
+  ownerEmail: string;
+  ownerTownCity: string;
+  ageYears: number | null;
+  vaccinationDate: string;
+  kennelCoughDate: string;
+  medications: string;
+  specialDiet: string;
+  comments: string;
+  dailyRate: number;
+  upcomingStay: string;
+  stayHistory: Array<{
+    visitId: string;
+    arrivalDate: string;
+    departureDate: string;
+    status: string;
+    dailyRate: number;
+    medications: string;
+    specialDiet: string;
+    comments: string;
+  }>;
+};
+
 function toMoneyString(value?: number | string | null) {
   if (value === null || value === undefined || value === "") {
     return "0.00";
@@ -92,6 +135,51 @@ function toDateInput(value?: string | null) {
 function toNumber(value?: number | string | null) {
   const numberValue = Number(value ?? 0);
   return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function toDisplayDate(value?: string | null) {
+  if (!value) {
+    return "Not set";
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Not set";
+  }
+
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatDateRange(arrivalDate?: string | null, departureDate?: string | null) {
+  if (!arrivalDate || !departureDate) {
+    return "No booking scheduled";
+  }
+
+  const arrival = new Date(`${arrivalDate}T00:00:00`);
+  const departure = new Date(`${departureDate}T00:00:00`);
+
+  if (Number.isNaN(arrival.getTime()) || Number.isNaN(departure.getTime())) {
+    return "No booking scheduled";
+  }
+
+  return `${arrival.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} - ${departure.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}`;
+}
+
+function createMockPetId(name: string) {
+  return `pet-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`;
 }
 
 function formatStatusLabel(status?: string | null) {
@@ -196,6 +284,72 @@ function buildMockCustomerDetail(identifier: string): CustomerDetailRecord | nul
         createdAt: "",
       },
     ],
+  };
+}
+
+function buildMockPetListItems(): PetListItem[] {
+  return customerRecords.flatMap((customer) =>
+    customer.boarders.map((boarder, index) => ({
+      id: createMockPetId(boarder),
+      name: boarder,
+      breedDescription: index % 3 === 0 ? "Springer Spaniel" : index % 3 === 1 ? "Sprocker" : "Labrador Cross",
+      ownerName: customer.name,
+      ownerIdentifier: customer.id,
+      ageYears: index + 2,
+      medications: index % 2 === 0 ? "None recorded" : "Daily tablet with breakfast",
+      specialDiet: index % 2 === 0 ? "Standard kennel food" : "Owner food twice daily",
+      dailyRate: 24,
+      upcomingStay: customer.upcomingStay,
+      status: customer.status,
+    })),
+  );
+}
+
+function buildMockPetDetailRecord(identifier: string): PetDetailRecord | null {
+  const pet = buildMockPetListItems().find((item) => item.id === identifier);
+
+  if (!pet) {
+    return null;
+  }
+
+  const customer = customerRecords.find((record) => record.id === pet.ownerIdentifier);
+
+  if (!customer) {
+    return null;
+  }
+
+  return {
+    id: pet.id,
+    name: pet.name,
+    breedDescription: pet.breedDescription,
+    ownerName: customer.name,
+    ownerIdentifier: customer.id,
+    ownerPhone: customer.phone,
+    ownerEmail: customer.email,
+    ownerTownCity: customer.town,
+    ageYears: pet.ageYears,
+    vaccinationDate: "12 Mar 2025",
+    kennelCoughDate: "18 Jan 2026",
+    medications: pet.medications,
+    specialDiet: pet.specialDiet,
+    comments: "Settles quickly after evening walk and prefers a quiet kennel position.",
+    dailyRate: pet.dailyRate,
+    upcomingStay: pet.upcomingStay,
+    stayHistory:
+      pet.upcomingStay === "No booking scheduled"
+        ? []
+        : [
+            {
+              visitId: `${customer.id}-visit-1`,
+              arrivalDate: "2026-03-14",
+              departureDate: "2026-03-18",
+              status: "Scheduled",
+              dailyRate: pet.dailyRate,
+              medications: pet.medications,
+              specialDiet: pet.specialDiet,
+              comments: "Keep bedding from home in kennel overnight.",
+            },
+          ],
   };
 }
 
@@ -591,5 +745,183 @@ export async function getVisitDetailRecord(visitId: string): Promise<VisitDetail
     };
   } catch {
     return null;
+  }
+}
+
+export async function getPetListItems(): Promise<PetListItem[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return buildMockPetListItems();
+  }
+
+  try {
+    const supabase = await getSupabaseServerClient();
+    const [{ data: pets, error: petsError }, { data: customers }, { data: visitPets }, { data: visits }] = await Promise.all([
+      supabase
+        .from("pets")
+        .select("id, customer_id, name, breed_description, age_years, default_daily_rate, medications, special_diet, comments, vaccination_date, kennel_cough_date")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("customers")
+        .select("id, customer_code, name, status"),
+      supabase
+        .from("visit_pets")
+        .select("visit_id, pet_id, pet_name, daily_rate, medications, special_diet, comments"),
+      supabase
+        .from("visits")
+        .select("id, customer_id, arrival_date, departure_date, status")
+        .order("arrival_date", { ascending: true }),
+    ]);
+
+    if (petsError || !pets) {
+      return buildMockPetListItems();
+    }
+
+    const customersById = new Map((customers ?? []).map((customer) => [customer.id, customer]));
+    const visitById = new Map((visits ?? []).map((visit) => [visit.id, visit]));
+    const upcomingVisitByPetId = new Map<string, NonNullable<typeof visitPets>[number]>();
+    const today = new Date();
+
+    for (const visitPet of visitPets ?? []) {
+      if (!visitPet.pet_id) {
+        continue;
+      }
+
+      const visit = visitById.get(visitPet.visit_id);
+
+      if (!visit?.departure_date || new Date(`${visit.departure_date}T00:00:00`) < today) {
+        continue;
+      }
+
+      const current = upcomingVisitByPetId.get(visitPet.pet_id);
+
+      if (!current) {
+        upcomingVisitByPetId.set(visitPet.pet_id, visitPet);
+        continue;
+      }
+
+      const currentVisit = visitById.get(current.visit_id);
+
+      if (
+        currentVisit?.arrival_date &&
+        visit.arrival_date &&
+        new Date(`${visit.arrival_date}T00:00:00`) < new Date(`${currentVisit.arrival_date}T00:00:00`)
+      ) {
+        upcomingVisitByPetId.set(visitPet.pet_id, visitPet);
+      }
+    }
+
+    return pets.map((pet) => {
+      const owner = customersById.get(pet.customer_id);
+      const upcomingVisitPet = upcomingVisitByPetId.get(pet.id);
+      const upcomingVisit = upcomingVisitPet ? visitById.get(upcomingVisitPet.visit_id) : null;
+
+      return {
+        id: pet.id,
+        name: pet.name,
+        breedDescription: pet.breed_description ?? "Breed not recorded",
+        ownerName: owner?.name ?? "Customer",
+        ownerIdentifier: owner?.customer_code ?? pet.customer_id,
+        ageYears: pet.age_years,
+        medications: upcomingVisitPet?.medications ?? pet.medications ?? "None recorded",
+        specialDiet: upcomingVisitPet?.special_diet ?? pet.special_diet ?? "Standard kennel food",
+        dailyRate: toNumber(upcomingVisitPet?.daily_rate ?? pet.default_daily_rate),
+        upcomingStay: formatDateRange(upcomingVisit?.arrival_date, upcomingVisit?.departure_date),
+        status: owner?.status ?? "Active",
+      };
+    });
+  } catch {
+    return buildMockPetListItems();
+  }
+}
+
+export async function getPetDetailRecord(identifier: string): Promise<PetDetailRecord | null> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return buildMockPetDetailRecord(identifier);
+  }
+
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: pet, error: petError } = await supabase
+      .from("pets")
+      .select(
+        "id, customer_id, name, breed_description, age_years, default_daily_rate, medications, special_diet, comments, vaccination_date, kennel_cough_date",
+      )
+      .eq("id", identifier)
+      .maybeSingle();
+
+    if (petError || !pet) {
+      return buildMockPetDetailRecord(identifier);
+    }
+
+    const [{ data: customer }, { data: visitPets }, { data: visits }] = await Promise.all([
+      supabase
+        .from("customers")
+        .select("customer_code, name, phone, email, town_city")
+        .eq("id", pet.customer_id)
+        .maybeSingle(),
+      supabase
+        .from("visit_pets")
+        .select("visit_id, pet_id, pet_name, daily_rate, medications, special_diet, comments")
+        .eq("pet_id", pet.id),
+      supabase
+        .from("visits")
+        .select("id, arrival_date, departure_date, status")
+        .order("arrival_date", { ascending: false }),
+    ]);
+
+    const visitsById = new Map((visits ?? []).map((visit) => [visit.id, visit]));
+    const stayHistory = (visitPets ?? [])
+      .map((visitPet) => {
+        const visit = visitsById.get(visitPet.visit_id);
+
+        if (!visit) {
+          return null;
+        }
+
+        return {
+          visitId: visit.id,
+          arrivalDate: toDateInput(visit.arrival_date),
+          departureDate: toDateInput(visit.departure_date),
+          status: formatStatusLabel(visit.status),
+          dailyRate: toNumber(visitPet.daily_rate),
+          medications: visitPet.medications ?? pet.medications ?? "None recorded",
+          specialDiet: visitPet.special_diet ?? pet.special_diet ?? "Standard kennel food",
+          comments: visitPet.comments ?? pet.comments ?? "",
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .sort((left, right) => right.arrivalDate.localeCompare(left.arrivalDate));
+
+    const upcomingStay = stayHistory.find((visit) => {
+      if (!visit.departureDate) {
+        return false;
+      }
+
+      return new Date(`${visit.departureDate}T00:00:00`) >= new Date();
+    });
+
+    return {
+      id: pet.id,
+      name: pet.name,
+      breedDescription: pet.breed_description ?? "Breed not recorded",
+      ownerName: customer?.name ?? "Customer",
+      ownerIdentifier: customer?.customer_code ?? pet.customer_id,
+      ownerPhone: customer?.phone ?? "No phone recorded",
+      ownerEmail: customer?.email ?? "No email recorded",
+      ownerTownCity: customer?.town_city ?? "No town recorded",
+      ageYears: pet.age_years,
+      vaccinationDate: toDisplayDate(toDateInput(pet.vaccination_date)),
+      kennelCoughDate: toDisplayDate(toDateInput(pet.kennel_cough_date)),
+      medications: pet.medications ?? "None recorded",
+      specialDiet: pet.special_diet ?? "Standard kennel food",
+      comments: pet.comments ?? "No notes recorded.",
+      dailyRate: toNumber(pet.default_daily_rate),
+      upcomingStay: upcomingStay
+        ? formatDateRange(upcomingStay.arrivalDate, upcomingStay.departureDate)
+        : "No booking scheduled",
+      stayHistory,
+    };
+  } catch {
+    return buildMockPetDetailRecord(identifier);
   }
 }
