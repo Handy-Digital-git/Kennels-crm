@@ -13,6 +13,10 @@ type AppShellProps = {
 
 const authRoutes = new Set(["/login"]);
 
+function isPrintRoute(pathname: string | null) {
+  return Boolean(pathname?.endsWith("/print"));
+}
+
 function getPageTitle(pathname: string | null) {
   if (!pathname || pathname === "/") {
     return "Dashboard";
@@ -47,6 +51,10 @@ export function AppShell({ children }: AppShellProps) {
 
   if (pathname && authRoutes.has(pathname)) {
     return <div className="min-h-screen bg-slate-950 text-slate-50">{children}</div>;
+  }
+
+  if (isPrintRoute(pathname)) {
+    return <div className="min-h-screen bg-slate-100 text-slate-900 print:bg-white">{children}</div>;
   }
 
   const pageTitle = getPageTitle(pathname);

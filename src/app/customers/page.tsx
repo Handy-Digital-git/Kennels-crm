@@ -1,6 +1,22 @@
 import Link from "next/link";
-import { ArrowUpRight, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { CustomerActionsMenu } from "@/components/customer-actions-menu";
 import { customerRecords } from "@/lib/customer-data";
+import { getSupabaseServerClient } from "@/lib/supabase-server";
+
+type CustomerTableRow = {
+  id: string;
+  customerId: string;
+  name: string;
+  email: string;
+  phone: string;
+  town: string;
+  boarders: string[];
+  upcomingStay: string;
+  nights: number;
+  balanceDue: number;
+  status: "Active" | "New" | "Returning";
+};
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-GB", {
@@ -10,22 +26,180 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export default function CustomersPage() {
-  const activeCustomers = customerRecords.filter(
+function formatDateRange(arrivalDate?: string | null, departureDate?: string | null) {
+  if (!arrivalDate || !departureDate) {
+    return "No booking scheduled";
+  }
+
+  const arrival = new Date(arrivalDate);
+  const departure = new Date(departureDate);
+
+  if (Number.isNaN(arrival.getTime()) || Number.isNaN(departure.getTime())) {
+    return "No booking scheduled";
+  }
+
+  return `${arrival.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} - ${departure.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}`;
+}
+
+function getInclusiveDays(arrivalDate?: string | null, departureDate?: string | null) {
+  if (!arrivalDate || !departureDate) {
+    return 0;
+  }
+
+  const arrival = new Date(`${arrivalDate}T00:00:00Z`);
+  const departure = new Date(`${departureDate}T00:00:00Z`);
+
+  if (Number.isNaN(arrival.getTime()) || Number.isNaN(departure.getTime())) {
+    return 0;
+  }
+
+  const difference = Math.floor(
+    (departure.getTime() - arrival.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  return difference >= 0 ? difference + 1 : 0;
+}
+
+function parseNumber(value: number | string | null | undefined) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+async function getCustomerRows(): Promise<CustomerTableRow[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return customerRecords.map((customer) => ({
+      ...customer,
+      customerId: customer.id,
+    }));
+  }
+
+  try {
+    const supabase = await getSupabaseServerClient();
+    const [{ data: customers, error: customersError }, { data: pets, error: petsError }, { data: visits, error: visitsError }] = await Promise.all([
+      supabase
+        .from("customers")
+        .select("id, customer_code, name, email, phone, town_city, status")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("pets")
+        .select("id, customer_id, name"),
+      supabase
+        .from("visits")
+        .select("id, customer_id, arrival_date, departure_date, days_inclusive, total_amount, amount_paid, balance_owed, status, created_at"),
+    ]);
+
+    if (customersError || petsError || visitsError || !customers) {
+      return customerRecords.map((customer) => ({
+        ...customer,
+        customerId: customer.id,
+      }));
+    }
+
+    const petsByCustomerId = new Map<string, string[]>();
+
+    for (const pet of pets ?? []) {
+      if (!pet.customer_id || !pet.name) {
+        continue;
+      }
+
+      const currentPets = petsByCustomerId.get(pet.customer_id) ?? [];
+      currentPets.push(pet.name);
+      petsByCustomerId.set(pet.customer_id, currentPets);
+    }
+
+    const visitsByCustomerId = new Map<string, typeof visits>();
+
+    for (const visit of visits ?? []) {
+      if (!visit.customer_id) {
+        continue;
+      }
+
+      const currentVisits = visitsByCustomerId.get(visit.customer_id) ?? [];
+      currentVisits.push(visit);
+      visitsByCustomerId.set(visit.customer_id, currentVisits);
+    }
+
+    const today = new Date();
+
+    return customers.map((customer) => {
+      const customerVisits = [...(visitsByCustomerId.get(customer.id) ?? [])];
+
+      customerVisits.sort((left, right) => {
+        const leftDate = new Date(left.arrival_date ?? 0).getTime();
+        const rightDate = new Date(right.arrival_date ?? 0).getTime();
+        return leftDate - rightDate;
+      });
+
+      const upcomingVisit =
+        customerVisits.find((visit) => {
+          if (!visit.departure_date) {
+            return false;
+          }
+
+          return new Date(visit.departure_date) >= today;
+        }) ?? customerVisits.at(-1);
+
+      const balanceDue = customerVisits.reduce((sum, visit) => {
+        return sum + parseNumber(visit.balance_owed);
+      }, 0);
+
+      const upcomingNights = upcomingVisit
+        ? parseNumber(upcomingVisit.days_inclusive) || getInclusiveDays(
+            upcomingVisit.arrival_date,
+            upcomingVisit.departure_date,
+          )
+        : 0;
+
+      return {
+        id: customer.customer_code ?? customer.id,
+        customerId: customer.id,
+        name: customer.name,
+        email: customer.email ?? "No email recorded",
+        phone: customer.phone ?? "No phone recorded",
+        town: customer.town_city ?? "No town recorded",
+        boarders: petsByCustomerId.get(customer.id) ?? [],
+        upcomingStay: formatDateRange(
+          upcomingVisit?.arrival_date,
+          upcomingVisit?.departure_date,
+        ),
+        nights: upcomingNights,
+        balanceDue,
+        status: customer.status,
+      };
+    });
+  } catch {
+    return customerRecords.map((customer) => ({
+      ...customer,
+      customerId: customer.id,
+    }));
+  }
+}
+
+export default async function CustomersPage() {
+  const rows = await getCustomerRows();
+  const activeCustomers = rows.filter(
     (customer) => customer.status === "Active",
   ).length;
-  const totalBoarders = customerRecords.reduce(
+  const totalBoarders = rows.reduce(
     (sum, customer) => sum + customer.boarders.length,
     0,
   );
-  const outstandingBalance = customerRecords.reduce(
+  const outstandingBalance = rows.reduce(
     (sum, customer) => sum + customer.balanceDue,
     0,
   );
 
   return (
-    <main className="min-h-screen px-6 py-5 sm:px-8 lg:px-10">
-      <section className="mx-auto max-w-8xl space-y-6">
+    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+      <section className="mx-auto max-w-7xl space-y-6">
         <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
@@ -88,7 +262,7 @@ export default function CustomersPage() {
             </div>
 
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-              <label className="flex min-w-[280px] items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+              <label className="flex min-w-70 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
                 <Search className="h-4 w-4" />
                 <input
                   type="search"
@@ -106,7 +280,7 @@ export default function CustomersPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto lg:overflow-visible">
             <table className="min-w-full divide-y divide-slate-200 text-left">
               <thead className="bg-slate-50/80 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 <tr>
@@ -116,11 +290,11 @@ export default function CustomersPage() {
                   <th className="px-6 py-4">Contact</th>
                   <th className="px-6 py-4">Balance</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white">
-                {customerRecords.map((customer) => (
+                {rows.map((customer) => (
                   <tr key={customer.id} className="align-top transition hover:bg-slate-50/70">
                     <td className="px-6 py-5">
                       <div>
@@ -187,13 +361,7 @@ export default function CustomersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <Link
-                        href="/customers/new"
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
-                      >
-                        <span>Open</span>
-                        <ArrowUpRight className="h-4 w-4" />
-                      </Link>
+                      <CustomerActionsMenu customerId={customer.id} />
                     </td>
                   </tr>
                 ))}
