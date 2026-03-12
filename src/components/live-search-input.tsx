@@ -36,7 +36,7 @@ export function LiveSearchInput({
         params.delete(paramName);
       }
 
-       params.delete("page");
+      params.delete("page");
 
       const nextQuery = params.toString();
       const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
@@ -63,7 +63,7 @@ export function LiveSearchInput({
   }
 
   return (
-    <label className="flex min-w-70 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100">
+    <label className="flex w-full min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-100 sm:min-w-72">
       <Search className="h-4 w-4 shrink-0" />
       <input
         type="search"

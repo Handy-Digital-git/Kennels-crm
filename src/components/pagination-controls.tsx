@@ -55,16 +55,16 @@ export function PaginationControls({
   const nextPage = Math.min(totalPages, currentPage + 1);
 
   return (
-    <div className="flex flex-col gap-3 rounded-b-4xl border-t border-slate-200 bg-white px-6 py-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-      <p>
+    <div className="flex flex-col gap-3 rounded-b-4xl border-t border-slate-200 bg-white px-4 py-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <p className="text-center sm:text-left">
         Showing {startItem}-{endItem} of {totalItems}
       </p>
-      <div className="flex items-center gap-2 self-end sm:self-auto">
+      <div className="flex w-full items-center gap-2 sm:w-auto sm:self-auto">
         <Link
           href={buildHref(pathname, previousPage, searchParams)}
           aria-disabled={currentPage === 1}
           className={[
-            "inline-flex items-center justify-center rounded-xl border px-3 py-2 font-semibold transition",
+            "inline-flex flex-1 items-center justify-center rounded-xl border px-3 py-2 font-semibold transition sm:flex-none",
             currentPage === 1
               ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400"
               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950",
@@ -72,14 +72,14 @@ export function PaginationControls({
         >
           Previous
         </Link>
-        <span className="min-w-24 text-center font-medium text-slate-700">
+        <span className="min-w-0 flex-1 text-center font-medium text-slate-700 sm:min-w-24 sm:flex-none">
           Page {currentPage} of {totalPages}
         </span>
         <Link
           href={buildHref(pathname, nextPage, searchParams)}
           aria-disabled={currentPage === totalPages}
           className={[
-            "inline-flex items-center justify-center rounded-xl border px-3 py-2 font-semibold transition",
+            "inline-flex flex-1 items-center justify-center rounded-xl border px-3 py-2 font-semibold transition sm:flex-none",
             currentPage === totalPages
               ? "pointer-events-none border-slate-200 bg-slate-100 text-slate-400"
               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950",

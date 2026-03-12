@@ -343,7 +343,7 @@ export function NewCustomerForm({
 
   return (
     <form className="space-y-6" onSubmit={onSubmit}>
-      <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-slate-950 p-3 text-white">
             <UserRound className="h-5 w-5" />
@@ -412,7 +412,7 @@ export function NewCustomerForm({
         </div>
       </section>
 
-      <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-blue-600 p-3 text-white">
             <CalendarDays className="h-5 w-5" />
@@ -473,7 +473,7 @@ export function NewCustomerForm({
         </Field>
       </section>
 
-      <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl bg-emerald-600 p-3 text-white">
             <Dog className="h-5 w-5" />
@@ -594,7 +594,7 @@ export function NewCustomerForm({
       </section>
 
       <div className="space-y-6">
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl bg-amber-500 p-3 text-white">
               <CircleDollarSign className="h-5 w-5" />
@@ -629,7 +629,7 @@ export function NewCustomerForm({
           </div>
         </section>
 
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <h3 className="text-xl font-semibold text-slate-950">Billing summary</h3>
           <p className="mt-1 text-sm text-slate-500">
             Totals taken directly from the paper booking sheet.
@@ -679,7 +679,7 @@ export function NewCustomerForm({
         </section>
       </div>
 
-      <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
         <h3 className="text-xl font-semibold text-slate-950">Terms and care reminders</h3>
         <p className="mt-2 text-sm leading-6 text-slate-600">
           All dogs must be fully vaccinated against distemper, hepatitis, leptospirosis, canine parvovirus, and relevant kennel cough cover before boarding is confirmed.

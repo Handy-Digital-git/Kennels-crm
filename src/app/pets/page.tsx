@@ -58,13 +58,13 @@ export default async function PetsPage({ searchParams }: PetsPageProps) {
   ).length;
 
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <section className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+        <div className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600">
             Pets
           </p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Pet profiles
           </h2>
           <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
@@ -94,7 +94,7 @@ export default async function PetsPage({ searchParams }: PetsPageProps) {
         </div>
 
         <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
             <div>
               <h3 className="text-xl font-semibold text-slate-950">Active pet list</h3>
               <p className="mt-1 text-sm text-slate-500">
@@ -108,7 +108,78 @@ export default async function PetsPage({ searchParams }: PetsPageProps) {
             />
           </div>
 
-          <div className="overflow-x-auto lg:overflow-visible">
+          <div className="divide-y divide-slate-200 md:hidden">
+            {paginatedPets.pageItems.map((pet) => (
+              <article key={pet.id} className="space-y-4 px-4 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-base font-semibold text-slate-950">{pet.name}</p>
+                    <p className="mt-1 text-sm text-slate-500">{pet.breedDescription}</p>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      {pet.ageYears ? `${pet.ageYears} years old` : "Age not recorded"}
+                    </p>
+                  </div>
+                  <div className="shrink-0">
+                    <PetActionsMenu
+                      petId={pet.id}
+                      ownerIdentifier={pet.ownerIdentifier}
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Owner
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-slate-900">
+                    {pet.ownerName}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {pet.ownerIdentifier}
+                  </p>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-3">
+                  <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Rate
+                    </dt>
+                    <dd className="mt-2 text-sm font-semibold text-slate-950">
+                      {formatCurrency(pet.dailyRate)}
+                    </dd>
+                  </div>
+                  <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Upcoming stay
+                    </dt>
+                    <dd className="mt-2 text-sm font-medium text-slate-900">
+                      {pet.upcomingStay}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Care profile
+                  </p>
+                  <p className="mt-2 text-sm text-slate-700">{pet.medications}</p>
+                  <p className="mt-2 text-sm text-slate-500">{pet.specialDiet}</p>
+                </div>
+              </article>
+            ))}
+            {paginatedPets.totalItems === 0 ? (
+              <div className="px-6 py-10 text-center">
+                <p className="text-sm font-semibold text-slate-950">
+                  No pets matched that search.
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Try a pet name, owner, breed, medication, or diet note.
+                </p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block lg:overflow-visible">
             <table className="min-w-full divide-y divide-slate-200 text-left">
               <thead className="bg-slate-50/80 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 <tr>

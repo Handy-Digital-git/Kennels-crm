@@ -129,13 +129,13 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
   const paginatedVisits = paginateItems(filteredVisits, requestedPage);
 
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <section className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+        <div className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
             Visits
           </p>
-          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Visit register
           </h2>
           <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">
@@ -144,7 +144,7 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
         </div>
 
         <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
             <div>
               <h3 className="text-lg font-semibold text-slate-950">
                 Visit table
@@ -162,7 +162,74 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
             </div>
           </div>
 
-          <div className="overflow-x-auto lg:overflow-visible">
+          <div className="divide-y divide-slate-200 md:hidden">
+            {paginatedVisits.pageItems.map((visit) => (
+              <article key={visit.id} className="space-y-4 px-4 py-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-base font-semibold text-slate-950">
+                      {visit.customerName}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {visit.customerIdentifier}
+                    </p>
+                  </div>
+                  <div className="shrink-0">
+                    <VisitActionsMenu visitId={visit.id} />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                    {visit.status}
+                  </span>
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100">
+                    {visit.boardersBooked} boarder{visit.boardersBooked === 1 ? "" : "s"}
+                  </span>
+                </div>
+
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Visit dates
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-slate-900">
+                    {formatDateRange(visit.arrivalDate, visit.departureDate)}
+                  </p>
+                </div>
+
+                <dl className="grid grid-cols-2 gap-3">
+                  <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Total
+                    </dt>
+                    <dd className="mt-2 text-sm font-semibold text-slate-950">
+                      {formatCurrency(visit.totalAmount)}
+                    </dd>
+                  </div>
+                  <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Balance
+                    </dt>
+                    <dd className="mt-2 text-sm font-semibold text-slate-950">
+                      {formatCurrency(visit.balanceOwed)}
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+            {paginatedVisits.totalItems === 0 ? (
+              <div className="px-6 py-10 text-center">
+                <p className="text-sm font-semibold text-slate-950">
+                  No visits matched that search.
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Try a customer name, status, visit ID, or clear the filter.
+                </p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block lg:overflow-visible">
             <table className="min-w-full divide-y divide-slate-200 text-left">
               <thead className="bg-slate-50/80 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 <tr>

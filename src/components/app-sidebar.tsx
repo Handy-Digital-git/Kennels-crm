@@ -5,13 +5,19 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
-  ChevronsLeft,
   ChevronsUpDown,
   Dog,
-  MoreHorizontal,
+  X,
   Users,
 } from "lucide-react";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
+
+type AppSidebarProps = {
+  className?: string;
+  mobile?: boolean;
+  onNavigateAction?: () => void;
+  onCloseAction?: () => void;
+};
 
 type UserProfile = {
   name: string | null;
@@ -43,7 +49,7 @@ const navItems = [
   },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ className, mobile = false, onNavigateAction, onCloseAction }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -145,7 +151,14 @@ export function AppSidebar() {
     .join("") || "SU";
 
   return (
-    <aside className="flex h-full w-full max-w-xs flex-col border-r border-slate-200 bg-white px-4 py-5">
+    <aside
+      id={mobile ? "mobile-navigation" : undefined}
+      className={[
+        "flex h-full w-full flex-col bg-white px-4 py-5",
+        mobile ? "border-r border-slate-200" : "max-w-xs border-r border-slate-200",
+        className ?? "",
+      ].join(" ")}
+    >
       <div className="flex items-start justify-between gap-3 px-2">
         <Link href="/customers" className="flex min-w-0 items-center gap-3">
           <div className="flex h-9 w-9  shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-white shadow-[0_12px_28px_-18px_rgba(15,23,42,0.55)]">
@@ -160,13 +173,16 @@ export function AppSidebar() {
             </p>
           </div>
         </Link>
-        <button
-          type="button"
-          aria-label="Collapse sidebar"
-          className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-        >
-          <ChevronsLeft className="h-4 w-4" />
-        </button>
+        {mobile ? (
+          <button
+            type="button"
+            onClick={onCloseAction}
+            aria-label="Close navigation menu"
+            className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 shadow-sm">
@@ -191,15 +207,12 @@ export function AppSidebar() {
         </div>
       </div>
 
-      <nav className="mt-6 flex flex-1 flex-col gap-1.5">
-        <div className="mb-2 flex items-center justify-between px-2">
-          
-        </div>
+      <nav className="mt-6 flex flex-1 flex-col gap-1.5 overflow-y-auto">
         <p className="px-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           Navigation
         </p>
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname?.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
@@ -207,6 +220,7 @@ export function AppSidebar() {
               key={item.href}
               href={item.href}
               prefetch
+              onClick={onNavigateAction}
               className={[
                 "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive

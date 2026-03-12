@@ -4,7 +4,7 @@ function SkeletonBlock({ className }: { className: string }) {
 
 function SkeletonHeader({ accentClassName, showAction }: { accentClassName: string; showAction?: boolean }) {
   return (
-    <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10 lg:flex-row lg:items-end lg:justify-between">
+    <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
       <div className="min-w-0 flex-1">
         <SkeletonBlock className={["h-4 w-28 rounded-full", accentClassName].join(" ")} />
         <SkeletonBlock className="mt-4 h-10 w-72 max-w-full" />
@@ -34,13 +34,13 @@ function SkeletonStatCards() {
 
 export function CustomersPageLoadingSkeleton() {
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <section className="mx-auto max-w-7xl space-y-6">
         <SkeletonHeader accentClassName="bg-sky-200" showAction />
         <SkeletonStatCards />
 
         <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
             <div className="space-y-3">
               <SkeletonBlock className="h-5 w-32" />
               <SkeletonBlock className="h-4 w-116 max-w-full" />
@@ -127,13 +127,13 @@ export function CustomersPageLoadingSkeleton() {
 
 export function PetsPageLoadingSkeleton() {
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <section className="mx-auto max-w-7xl space-y-6">
         <SkeletonHeader accentClassName="bg-emerald-200" />
         <SkeletonStatCards />
 
         <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
             <div className="space-y-3">
               <SkeletonBlock className="h-6 w-32" />
               <SkeletonBlock className="h-4 w-[24rem] max-w-full" />
@@ -203,9 +203,9 @@ export function PetsPageLoadingSkeleton() {
 
 export function VisitsPageLoadingSkeleton() {
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <section className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+        <div className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
           <SkeletonBlock className="skeleton-tint-amber h-4 w-24 rounded-full" />
           <SkeletonBlock className="mt-4 h-10 w-64 max-w-full" />
           <SkeletonBlock className="mt-4 h-4 w-full max-w-3xl" />
@@ -213,7 +213,7 @@ export function VisitsPageLoadingSkeleton() {
         </div>
 
         <section className="overflow-hidden rounded-4xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
             <div className="space-y-3">
               <SkeletonBlock className="h-5 w-28" />
               <SkeletonBlock className="h-4 w-80 max-w-full" />

@@ -52,9 +52,9 @@ export default async function VisitDetailPage({ params, searchParams }: VisitDet
   const paginatedExtras = paginateItems(visit.extras, requestedPage);
 
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <Link
             href={`/customers/${visit.customerIdentifier}`}
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
@@ -75,7 +75,7 @@ export default async function VisitDetailPage({ params, searchParams }: VisitDet
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-          <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+          <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
             <div className="grid gap-4 sm:grid-cols-4">
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -162,7 +162,7 @@ export default async function VisitDetailPage({ params, searchParams }: VisitDet
           </section>
 
           <aside className="space-y-6">
-            <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
               <h2 className="text-xl font-semibold text-slate-950">Billing summary</h2>
               <div className="mt-6 space-y-3 text-sm text-slate-600">
                 <div className="flex items-center justify-between">
@@ -200,7 +200,7 @@ export default async function VisitDetailPage({ params, searchParams }: VisitDet
               </div>
             </section>
 
-            <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
               <h2 className="text-xl font-semibold text-slate-950">Settle bill</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Record payment against this visit only. Previous and future visits remain untouched.

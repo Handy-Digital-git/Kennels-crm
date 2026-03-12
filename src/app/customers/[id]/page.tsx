@@ -47,9 +47,9 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
   }
 
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
           <div>
             <Link
               href="/customers"
@@ -82,7 +82,7 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
           currentVisitDates={customer.currentVisitDates}
         />
 
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">

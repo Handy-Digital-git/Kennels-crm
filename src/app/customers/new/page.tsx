@@ -4,9 +4,9 @@ import { NewCustomerForm } from "@/components/new-customer-form";
 
 export default function NewCustomerPage() {
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:flex-row lg:items-end lg:justify-between lg:p-10">
           <div>
             <Link
               href="/customers"

@@ -78,9 +78,9 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
   const displayPetId = formatPetRecordId(pet.id);
 
   return (
-    <main className="min-h-screen px-6 py-10 sm:px-8 lg:px-10">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-6">
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+        <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
           <Link
             href="/pets"
             className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-900"
@@ -206,7 +206,7 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
           </section>
 
           <aside className="xl:sticky xl:top-24">
-            <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
                 Owner
               </p>
@@ -244,7 +244,7 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
           </aside>
         </div>
 
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
@@ -295,7 +295,7 @@ export default async function PetDetailPage({ params }: PetDetailPageProps) {
           </div>
         </section>
 
-        <section className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
