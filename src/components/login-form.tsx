@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, LoaderCircle, LockKeyhole, Mail } from "lucide-react";
 import {
@@ -60,11 +59,6 @@ export function LoginForm() {
           </h1>
         </div>
       </div>
-
-      <p className="mt-5 text-sm leading-6 text-slate-600">
-        Sign in to manage bookings, customer records, pet profiles, and daily
-        visit activity.
-      </p>
 
       {!hasSupabasePublicEnv ? (
         <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -136,12 +130,6 @@ export function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 flex items-center justify-between gap-4 text-sm text-slate-500">
-        <span>Protected by Supabase Auth</span>
-        <Link href="https://supabase.com/dashboard" className="font-semibold text-blue-600 hover:text-blue-500">
-          Open dashboard
-        </Link>
-      </div>
     </div>
   );
 }

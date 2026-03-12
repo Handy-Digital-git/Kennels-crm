@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kennel CRM",
+  title: "Blairadam Kennel CRM",
   description: "Customer, pet, and visit management for kennel staff.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
