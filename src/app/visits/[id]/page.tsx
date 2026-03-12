@@ -126,33 +126,35 @@ export default async function VisitDetailPage({ params, searchParams }: VisitDet
             <div className="mt-8 space-y-4">
               <h2 className="text-xl font-semibold text-slate-950">Extras</h2>
               {visit.extras.length > 0 ? (
-                <div className="rounded-3xl border border-slate-200 overflow-hidden">
-                  <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                    <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      <tr>
-                        <th className="px-5 py-4">Extra</th>
-                        <th className="px-5 py-4 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200 bg-white">
-                      {paginatedExtras.pageItems.map((extra) => (
-                        <tr key={extra.label}>
-                          <td className="px-5 py-4 text-slate-700">{extra.label}</td>
-                          <td className="px-5 py-4 text-right font-semibold text-slate-950">{formatCurrency(extra.amount)}</td>
+                <>
+                  <div className="rounded-3xl border border-slate-200 overflow-hidden">
+                    <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
+                      <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <tr>
+                          <th className="px-5 py-4">Extra</th>
+                          <th className="px-5 py-4 text-right">Amount</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <PaginationControls
-                  pathname={`/visits/${visit.id}`}
-                  currentPage={paginatedExtras.currentPage}
-                  totalPages={paginatedExtras.totalPages}
-                  totalItems={paginatedExtras.totalItems}
-                  startItem={paginatedExtras.startItem}
-                  endItem={paginatedExtras.endItem}
-                  searchParams={resolvedSearchParams}
-                />
+                      </thead>
+                      <tbody className="divide-y divide-slate-200 bg-white">
+                        {paginatedExtras.pageItems.map((extra) => (
+                          <tr key={extra.label}>
+                            <td className="px-5 py-4 text-slate-700">{extra.label}</td>
+                            <td className="px-5 py-4 text-right font-semibold text-slate-950">{formatCurrency(extra.amount)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <PaginationControls
+                    pathname={`/visits/${visit.id}`}
+                    currentPage={paginatedExtras.currentPage}
+                    totalPages={paginatedExtras.totalPages}
+                    totalItems={paginatedExtras.totalItems}
+                    startItem={paginatedExtras.startItem}
+                    endItem={paginatedExtras.endItem}
+                    searchParams={resolvedSearchParams}
+                  />
+                </>
               ) : (
                 <p className="text-sm text-slate-500">No extras recorded for this visit.</p>
               )}
