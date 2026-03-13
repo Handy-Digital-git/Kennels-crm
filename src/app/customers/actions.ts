@@ -47,6 +47,33 @@ type VisitMutationResult = {
   visitId: string;
 };
 
+function isMissingVetColumnError(message?: string | null) {
+  return Boolean(
+    message && /vet_name|vet_address|vet_contact_number/i.test(message),
+  );
+}
+
+function buildCustomerPayload(input: CreateCustomerBookingInput, includeVetDetails: boolean) {
+  return {
+    name: input.customer.name,
+    email: input.customer.email || null,
+    phone: input.customer.phone || null,
+    address_line_1: input.customer.addressLine1 || null,
+    town_city: input.customer.townCity || null,
+    postcode: input.customer.postcode || null,
+    emergency_contact_name: input.customer.emergencyContactName || null,
+    emergency_contact_phone: input.customer.emergencyContactPhone || null,
+    ...(includeVetDetails
+      ? {
+          vet_name: input.vetDetails.vetName || null,
+          vet_address: input.vetDetails.vetAddress || null,
+          vet_contact_number: input.vetDetails.vetContactNumber || null,
+        }
+      : {}),
+    status: input.customer.status,
+  };
+}
+
 function parseAmount(value: string | number | null | undefined) {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -465,21 +492,21 @@ export async function createCustomerBooking(input: CreateCustomerBookingInput) {
   const { boarders } = validation;
   const derived = getDerivedBookingValues(input, boarders);
 
-  const { data: insertedCustomer, error: insertCustomerError } = await supabase
+  let insertCustomerResult = await supabase
     .from("customers")
-    .insert({
-      name: input.customer.name,
-      email: input.customer.email || null,
-      phone: input.customer.phone || null,
-      address_line_1: input.customer.addressLine1 || null,
-      town_city: input.customer.townCity || null,
-      postcode: input.customer.postcode || null,
-      emergency_contact_name: input.customer.emergencyContactName || null,
-      emergency_contact_phone: input.customer.emergencyContactPhone || null,
-      status: input.customer.status,
-    })
+    .insert(buildCustomerPayload(input, true))
     .select("id, customer_code")
     .single();
+
+  if (insertCustomerResult.error && isMissingVetColumnError(insertCustomerResult.error.message)) {
+    insertCustomerResult = await supabase
+      .from("customers")
+      .insert(buildCustomerPayload(input, false))
+      .select("id, customer_code")
+      .single();
+  }
+
+  const { data: insertedCustomer, error: insertCustomerError } = insertCustomerResult;
 
   if (insertCustomerError || !insertedCustomer) {
     return { error: insertCustomerError?.message ?? "Failed to create customer." };
@@ -548,20 +575,19 @@ export async function updateCustomerBooking(
 
   const { customerId, customerCode } = customerLookup;
 
-  const { error: customerError } = await supabase
+  let customerUpdateResult = await supabase
     .from("customers")
-    .update({
-      name: input.customer.name,
-      email: input.customer.email || null,
-      phone: input.customer.phone || null,
-      address_line_1: input.customer.addressLine1 || null,
-      town_city: input.customer.townCity || null,
-      postcode: input.customer.postcode || null,
-      emergency_contact_name: input.customer.emergencyContactName || null,
-      emergency_contact_phone: input.customer.emergencyContactPhone || null,
-      status: input.customer.status,
-    })
+    .update(buildCustomerPayload(input, true))
     .eq("id", customerId);
+
+  if (customerUpdateResult.error && isMissingVetColumnError(customerUpdateResult.error.message)) {
+    customerUpdateResult = await supabase
+      .from("customers")
+      .update(buildCustomerPayload(input, false))
+      .eq("id", customerId);
+  }
+
+  const { error: customerError } = customerUpdateResult;
 
   if (customerError) {
     return { error: customerError.message };

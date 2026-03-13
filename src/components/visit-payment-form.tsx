@@ -58,28 +58,30 @@ export function VisitPaymentForm({
         </div>
       </label>
 
-      <button
-        type="button"
-        onClick={() => setAmountPaid(totalAmount.toFixed(2))}
-        className="text-sm font-semibold text-blue-600 transition hover:text-blue-500"
-      >
-        Mark as fully paid
-      </button>
-
       {serverError ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {serverError}
         </div>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
-      >
-        {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
-        <span>{isPending ? "Saving..." : "Save payment"}</span>
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-y-3 pt-1">
+        <button
+          type="button"
+          onClick={() => setAmountPaid(totalAmount.toFixed(2))}
+          className="text-sm font-semibold text-blue-600 transition hover:text-blue-500"
+        >
+          Mark as fully paid
+        </button>
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        >
+          {isPending ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+          <span>{isPending ? "Saving..." : "Save payment"}</span>
+        </button>
+      </div>
     </form>
   );
 }

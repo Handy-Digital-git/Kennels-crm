@@ -17,6 +17,11 @@ export type CustomerFormValues = {
     daysInclusive: string;
     bookingNotes: string;
   };
+  vetDetails: {
+    vetName: string;
+    vetAddress: string;
+    vetContactNumber: string;
+  };
   boarders: Array<{
     name: string;
     description: string;
@@ -69,6 +74,11 @@ export const emptyCustomerFormValues: CustomerFormValues = {
     boardersBooked: "",
     daysInclusive: "",
     bookingNotes: "",
+  },
+  vetDetails: {
+    vetName: "",
+    vetAddress: "",
+    vetContactNumber: "",
   },
   boarders: boarderTitles.map(() => ({
     name: "",

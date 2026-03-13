@@ -61,6 +61,24 @@ function formatStatusLabel(status?: string | null) {
   }
 }
 
+function isPaidBalance(balance: number) {
+  return balance === 0;
+}
+
+function getBalanceStatus(balance: number) {
+  if (isPaidBalance(balance)) {
+    return {
+      label: "Paid",
+      className: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+    };
+  }
+
+  return {
+    label: "Outstanding",
+    className: "bg-amber-50 text-amber-700 ring-amber-200",
+  };
+}
+
 async function getVisitRows(): Promise<VisitRow[]> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return [];
@@ -163,7 +181,10 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
           </div>
 
           <div className="divide-y divide-slate-200 md:hidden">
-            {paginatedVisits.pageItems.map((visit) => (
+            {paginatedVisits.pageItems.map((visit) => {
+              const balanceStatus = getBalanceStatus(visit.balanceOwed);
+
+              return (
               <article key={visit.id} className="space-y-4 px-4 py-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
@@ -214,9 +235,20 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
                       {formatCurrency(visit.balanceOwed)}
                     </dd>
                   </div>
+                  <div className="col-span-2 rounded-3xl border border-slate-200 bg-white px-4 py-4">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Payment status
+                    </dt>
+                    <dd className="mt-2">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ring-1 ${balanceStatus.className}`}>
+                        {balanceStatus.label}
+                      </span>
+                    </dd>
+                  </div>
                 </dl>
               </article>
-            ))}
+              );
+            })}
             {paginatedVisits.totalItems === 0 ? (
               <div className="px-6 py-10 text-center">
                 <p className="text-sm font-semibold text-slate-950">
@@ -239,11 +271,15 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
                   <th className="px-6 py-4">Boarders</th>
                   <th className="px-6 py-4">Total</th>
                   <th className="px-6 py-4">Balance</th>
+                  <th className="px-6 py-4">Payment status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white">
-                {paginatedVisits.pageItems.map((visit) => (
+                {paginatedVisits.pageItems.map((visit) => {
+                  const balanceStatus = getBalanceStatus(visit.balanceOwed);
+
+                  return (
                   <tr key={visit.id} className="hover:bg-slate-50/70">
                     <td className="px-6 py-5">
                       <p className="text-sm font-semibold text-slate-950">{visit.customerName}</p>
@@ -259,15 +295,23 @@ export default async function VisitsPage({ searchParams }: VisitsPageProps) {
                     </td>
                     <td className="px-6 py-5 text-sm text-slate-700">{visit.boardersBooked}</td>
                     <td className="px-6 py-5 text-sm font-semibold text-slate-950">{formatCurrency(visit.totalAmount)}</td>
-                    <td className="px-6 py-5 text-sm font-semibold text-slate-950">{formatCurrency(visit.balanceOwed)}</td>
+                    <td className="px-6 py-5 text-sm font-semibold text-slate-950">
+                      {formatCurrency(visit.balanceOwed)}
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ring-1 ${balanceStatus.className}`}>
+                        {balanceStatus.label}
+                      </span>
+                    </td>
                     <td className="px-6 py-5 text-right">
                       <VisitActionsMenu visitId={visit.id} />
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
                 {paginatedVisits.totalItems === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center">
+                    <td colSpan={8} className="px-6 py-10 text-center">
                       <p className="text-sm font-semibold text-slate-950">
                         No visits matched that search.
                       </p>

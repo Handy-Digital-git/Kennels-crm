@@ -198,6 +198,12 @@ function formatStatusLabel(status?: string | null) {
   }
 }
 
+function isMissingVetColumnError(message?: string | null) {
+  return Boolean(
+    message && /vet_name|vet_address|vet_contact_number/i.test(message),
+  );
+}
+
 function getRelatedPet(
   pet:
     | {
@@ -366,6 +372,9 @@ function buildInitialValuesFromVisit(args: {
     postcode?: string | null;
     emergency_contact_name?: string | null;
     emergency_contact_phone?: string | null;
+    vet_name?: string | null;
+    vet_address?: string | null;
+    vet_contact_number?: string | null;
     status?: "Active" | "New" | "Returning" | null;
   };
   visit?: {
@@ -412,6 +421,11 @@ function buildInitialValuesFromVisit(args: {
       boardersBooked: toCountString(args.visit?.boarders_booked),
       daysInclusive: toCountString(args.visit?.days_inclusive),
       bookingNotes: args.visit?.booking_notes ?? "",
+    },
+    vetDetails: {
+      vetName: args.customer.vet_name ?? "",
+      vetAddress: args.customer.vet_address ?? "",
+      vetContactNumber: args.customer.vet_contact_number ?? "",
     },
     boarders: normalizeBoarders(
       args.visitPets.map((visitPet) => ({
@@ -471,22 +485,39 @@ export async function getCustomerDetailRecord(
   try {
     const supabase = await getSupabaseServerClient();
 
+    const customerSelectWithVetFields =
+      "id, customer_code, name, email, phone, address_line_1, town_city, postcode, emergency_contact_name, emergency_contact_phone, vet_name, vet_address, vet_contact_number, status";
+    const customerSelectWithoutVetFields =
+      "id, customer_code, name, email, phone, address_line_1, town_city, postcode, emergency_contact_name, emergency_contact_phone, status";
+
     let customerResponse = await supabase
       .from("customers")
-      .select(
-        "id, customer_code, name, email, phone, address_line_1, town_city, postcode, emergency_contact_name, emergency_contact_phone, status",
-      )
+      .select(customerSelectWithVetFields)
       .eq("customer_code", identifier)
       .maybeSingle();
+
+    if (customerResponse.error && isMissingVetColumnError(customerResponse.error.message)) {
+      customerResponse = await supabase
+        .from("customers")
+        .select(customerSelectWithoutVetFields)
+        .eq("customer_code", identifier)
+        .maybeSingle();
+    }
 
     if (!customerResponse.data && /^[0-9a-f-]{36}$/i.test(identifier)) {
       customerResponse = await supabase
         .from("customers")
-        .select(
-          "id, customer_code, name, email, phone, address_line_1, town_city, postcode, emergency_contact_name, emergency_contact_phone, status",
-        )
+        .select(customerSelectWithVetFields)
         .eq("id", identifier)
         .maybeSingle();
+
+      if (customerResponse.error && isMissingVetColumnError(customerResponse.error.message)) {
+        customerResponse = await supabase
+          .from("customers")
+          .select(customerSelectWithoutVetFields)
+          .eq("id", identifier)
+          .maybeSingle();
+      }
     }
 
     if (customerResponse.error || !customerResponse.data) {

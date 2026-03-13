@@ -298,7 +298,7 @@ export default async function VisitPrintPage({ params }: VisitPrintPageProps) {
             </p>
             <p className="mt-2 text-base print:mt-1 print:text-[9px]">Kelty, Fife. KY4 0JN</p>
             <p className="text-base print:text-[9px]">Tel: 01383 830 690</p>
-            <p className="text-base print:text-[9px]">Proprietors Carole and Dave Taylor</p>
+            <p className="text-base print:text-[9px]">Proprietor Morag Ford</p>
           </footer>
         </article>
       </div>

@@ -9,6 +9,7 @@ import {
   CircleDollarSign,
   Dog,
   LoaderCircle,
+  Stethoscope,
   UserRound,
 } from "lucide-react";
 import {
@@ -590,6 +591,42 @@ export function NewCustomerForm({
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:p-8">
+        <div className="flex items-center gap-3">
+          <div className="rounded-2xl bg-teal-600 p-3 text-white">
+            <Stethoscope className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold text-slate-950">Vet details</h3>
+            <p className="text-sm text-slate-500">
+              Record the primary veterinary practice details for this customer.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <Field label="Vet name">
+            <input
+              {...register("vetDetails.vetName")}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Vet address">
+            <input
+              {...register("vetDetails.vetAddress")}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Vet contact number">
+            <input
+              {...register("vetDetails.vetContactNumber")}
+              type="tel"
+              className={inputClassName}
+            />
+          </Field>
         </div>
       </section>
 
