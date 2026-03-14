@@ -35,7 +35,7 @@ const billTerms = [
   "All cats must be fully vaccinated against feline influenza, feline enteritis, and other relevant diseases. We also recommend F.G.L.V. vaccine 10 days prior to boarding. A current vaccination certificate must be produced.",
   "Whilst every possible care and attention is given to each individual animal boarded at these kennels, we cannot be held responsible for loss either by illness or other cause.",
   "If a veterinary surgeon is called in for treatment, the account is to be paid by the owner.",
-  "Animals are only accepted during business hours of 10am to 6pm.",
+  "Animals are only accepted during business hours of 09:30am to 15:30pm.",
   "Animals will not be released until the boarding fees have been paid.",
 ];
 
@@ -303,9 +303,10 @@ export default async function CustomerPrintBillPage({ params }: CustomerPrintBil
 
           <footer className="mt-8 text-center text-black print:mt-2.5 print:text-[8.75px] print:leading-3.25">
             <p className="text-lg font-semibold uppercase tracking-[0.06em] text-black underline underline-offset-4 print:text-[10px]">
-              Blairadam Boarding Kennels & Cattery
+              Blairadam Kennels Ltd
             </p>
-            <p className="mt-2 text-base print:mt-1 print:text-[9px]">Kelty, Fife. KY4 0JN</p>
+            <p className="mt-2 text-base print:mt-1 print:text-[9px]">VAT Reg N0: SC823808</p>
+            <p className="text-base print:mt-1 print:text-[9px]">Kelty, Fife. KY4 0JN</p>
             <p className="text-base print:text-[9px]">Tel: 01383 830 690</p>
             <p className="text-base print:text-[9px]">Proprietor Morag Ford</p>
           </footer>
