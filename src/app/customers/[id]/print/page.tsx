@@ -260,9 +260,26 @@ export default async function CustomerPrintBillPage({ params }: CustomerPrintBil
 
           <section className="mt-8 rounded-3xl border border-black/15 p-6 print:mt-2.5 print:rounded-2xl print:p-2.5">
             <ol className="space-y-3 text-sm leading-6 text-black print:grid print:grid-cols-2 print:gap-x-4 print:gap-y-1 print:space-y-0 print:text-[8.6px] print:leading-[1.22]">
-              {billTerms.map((term) => (
-                <li key={term} className="flex gap-3">
-                  <span className="font-semibold text-black">{billTerms.indexOf(term) + 1})</span>
+              {billTerms.map((term, index) => (
+                <li
+                  key={term}
+                  className="flex gap-3"
+                  style={
+                    index === 2 || index === 4
+                      ? { color: "#dc2626", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }
+                      : undefined
+                  }
+                >
+                  <span
+                    className="font-semibold"
+                    style={
+                      index === 2 || index === 4
+                        ? { color: "#dc2626", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }
+                        : undefined
+                    }
+                  >
+                    {index + 1})
+                  </span>
                   <span>{term}</span>
                 </li>
               ))}

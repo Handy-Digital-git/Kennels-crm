@@ -310,10 +310,7 @@ export default async function VisitPrintPage({ params }: VisitPrintPageProps) {
           </section>
 
           <footer className="mt-8 text-center text-black print:mt-2.5 print:text-[8.75px] print:leading-3.25">
-            <p
-              className="text-lg font-semibold uppercase tracking-[0.06em] underline underline-offset-4 print:text-[10px]"
-              style={{ color: "#dc2626", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
-            >
+            <p className="text-lg font-semibold uppercase tracking-[0.06em] text-black underline underline-offset-4 print:text-[10px]">
               Blairadam Kennels Ltd
             </p>
             <p className="mt-2 text-base print:mt-1 print:text-[9px]">VAT Reg N0: SC823808</p>
