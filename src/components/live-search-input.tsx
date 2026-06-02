@@ -29,6 +29,8 @@ export function LiveSearchInput({
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString());
+      const currentParamValue = searchParams.get(paramName) ?? "";
+      const didSearchValueChange = value !== currentParamValue;
 
       if (value) {
         params.set(paramName, value);
@@ -36,7 +38,9 @@ export function LiveSearchInput({
         params.delete(paramName);
       }
 
-      params.delete("page");
+      if (didSearchValueChange) {
+        params.delete("page");
+      }
 
       const nextQuery = params.toString();
       const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;

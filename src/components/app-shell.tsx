@@ -17,6 +17,10 @@ function isPrintRoute(pathname: string | null) {
   return Boolean(pathname?.endsWith("/print"));
 }
 
+function shouldBypassShell(pathname: string | null) {
+  return Boolean(pathname && (authRoutes.has(pathname) || isPrintRoute(pathname)));
+}
+
 function getPageTitle(pathname: string | null) {
   if (!pathname || pathname === "/") {
     return "Customers";
@@ -37,9 +41,10 @@ export function AppShell({ children }: AppShellProps) {
   const [isSigningOut, startTransition] = useTransition();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const bypassShell = shouldBypassShell(pathname);
 
   useEffect(() => {
-    if (pathname && authRoutes.has(pathname)) {
+    if (bypassShell) {
       setIsAuthChecking(false);
       return;
     }
@@ -99,7 +104,7 @@ export function AppShell({ children }: AppShellProps) {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [pathname, router]);
+  }, [bypassShell, pathname, router]);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -144,12 +149,12 @@ export function AppShell({ children }: AppShellProps) {
     return <div className="min-h-screen bg-slate-950 text-slate-50">{children}</div>;
   }
 
-  if (isAuthChecking) {
-    return <div className="min-h-screen bg-slate-100" />;
-  }
-
   if (isPrintRoute(pathname)) {
     return <div className="min-h-screen bg-slate-100 text-slate-900 print:bg-white">{children}</div>;
+  }
+
+  if (isAuthChecking) {
+    return <div className="min-h-screen bg-slate-100" />;
   }
 
   const pageTitle = getPageTitle(pathname);
