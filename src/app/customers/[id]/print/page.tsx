@@ -37,6 +37,8 @@ const billTerms = [
   "If a veterinary surgeon is called in for treatment, the account is to be paid by the owner.",
   "Animals are only accepted during business hours of 09:30am to 15:30pm.",
   "Animals will not be released until the boarding fees have been paid.",
+  "Any fights or injuries that occur within a multi-dog household if you confirm the dogs can be housed in the same kennel. Whilst every precaution is taken to prevent fights, sometimes this is not always possible.",
+  "If a vet has to provide treatment to your animal during their stay with us, we will cover the cost of this at the visit but the cost of the vet visit or treatment will be added to your final bill.",
 ];
 
 type CustomerPrintBillPageProps = {
@@ -263,23 +265,29 @@ export default async function CustomerPrintBillPage({ params }: CustomerPrintBil
               {billTerms.map((term, index) => (
                 <li
                   key={term}
-                  className="flex gap-3"
+                  className={
+                    index === 7
+                      ? "text-center text-base font-bold uppercase tracking-[0.08em] text-black print:col-span-2 print:text-[9px] print:leading-[1.28]"
+                      : "flex gap-3"
+                  }
                   style={
-                    index === 2 || index === 4
+                    index === 2 || index === 4 || index === 6
                       ? { color: "#dc2626", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }
                       : undefined
                   }
                 >
-                  <span
-                    className="font-semibold"
-                    style={
-                      index === 2 || index === 4
-                        ? { color: "#dc2626", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }
-                        : undefined
-                    }
-                  >
-                    {index + 1})
-                  </span>
+                  {index === 7 ? null : (
+                    <span
+                      className="font-semibold"
+                      style={
+                        index === 2 || index === 4 || index === 6
+                          ? { color: "#dc2626", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }
+                          : undefined
+                      }
+                    >
+                      {index + 1})
+                    </span>
+                  )}
                   <span>{term}</span>
                 </li>
               ))}

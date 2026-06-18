@@ -10,7 +10,7 @@ import {
   X,
   Users,
 } from "lucide-react";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
+import { getSupabaseBrowserClient, hasSupabasePublicEnv } from "@/lib/supabase";
 
 type AppSidebarProps = {
   className?: string;
@@ -53,7 +53,7 @@ export function AppSidebar({ className, mobile = false, onNavigateAction, onClos
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(hasSupabasePublicEnv);
 
   useEffect(() => {
     navItems.forEach((item) => {
@@ -65,7 +65,6 @@ export function AppSidebar({ className, mobile = false, onNavigateAction, onClos
     const supabase = getSupabaseBrowserClient();
 
     if (!supabase) {
-      setIsProfileLoading(false);
       return;
     }
 

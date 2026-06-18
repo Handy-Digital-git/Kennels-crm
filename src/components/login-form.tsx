@@ -40,7 +40,6 @@ export function LoginForm() {
 
     startTransition(() => {
       router.replace("/");
-      router.refresh();
     });
   }
 

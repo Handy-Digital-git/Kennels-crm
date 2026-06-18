@@ -39,22 +39,17 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isSigningOut, startTransition] = useTransition();
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const bypassShell = shouldBypassShell(pathname);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (bypassShell) {
-      setIsAuthChecking(false);
+    if (bypassShell || !hasSupabasePublicEnv) {
       return;
     }
 
     const supabaseClient = getSupabaseBrowserClient();
 
     if (!supabaseClient) {
-      setIsAuthChecking(false);
-      router.replace("/login");
-      router.refresh();
       return;
     }
 
@@ -72,13 +67,9 @@ export function AppShell({ children }: AppShellProps) {
       }
 
       if (!user) {
-        setIsAuthChecking(false);
         router.replace("/login");
-        router.refresh();
         return;
       }
-
-      setIsAuthChecking(false);
     }
 
     void validateSession();
@@ -91,13 +82,8 @@ export function AppShell({ children }: AppShellProps) {
       }
 
       if (!session?.user) {
-        setIsAuthChecking(false);
         router.replace("/login");
-        router.refresh();
-        return;
       }
-
-      setIsAuthChecking(false);
     });
 
     return () => {
@@ -105,10 +91,6 @@ export function AppShell({ children }: AppShellProps) {
       subscription.unsubscribe();
     };
   }, [bypassShell, pathname, router]);
-
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!isMobileMenuOpen) {
@@ -141,7 +123,6 @@ export function AppShell({ children }: AppShellProps) {
 
     startTransition(() => {
       router.replace("/login");
-      router.refresh();
     });
   }
 
@@ -151,10 +132,6 @@ export function AppShell({ children }: AppShellProps) {
 
   if (isPrintRoute(pathname)) {
     return <div className="min-h-screen bg-slate-100 text-slate-900 print:bg-white">{children}</div>;
-  }
-
-  if (isAuthChecking) {
-    return <div className="min-h-screen bg-slate-100" />;
   }
 
   const pageTitle = getPageTitle(pathname);

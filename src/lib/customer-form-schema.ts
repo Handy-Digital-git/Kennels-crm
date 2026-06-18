@@ -54,7 +54,23 @@ export type CustomerFormValues = {
   };
 };
 
-export const boarderTitles = ["Boarder 1", "Boarder 2", "Boarder 3"];
+export const emptyBoarderFormValues = {
+  name: "",
+  description: "",
+  age: "",
+  medications: "",
+  specialDiet: "",
+  comments: "",
+  vaccinationDate: "",
+  kennelCoughDate: "",
+  dailyRate: "",
+};
+
+export function createEmptyBoarders(count: number) {
+  return Array.from({ length: Math.max(count, 1) }, () => ({
+    ...emptyBoarderFormValues,
+  }));
+}
 
 export const emptyCustomerFormValues: CustomerFormValues = {
   customer: {
@@ -80,17 +96,7 @@ export const emptyCustomerFormValues: CustomerFormValues = {
     vetAddress: "",
     vetContactNumber: "",
   },
-  boarders: boarderTitles.map(() => ({
-    name: "",
-    description: "",
-    age: "",
-    medications: "",
-    specialDiet: "",
-    comments: "",
-    vaccinationDate: "",
-    kennelCoughDate: "",
-    dailyRate: "",
-  })),
+  boarders: createEmptyBoarders(1),
   extras: {
     grooming: "0.00",
     pickupDelivery: "0.00",

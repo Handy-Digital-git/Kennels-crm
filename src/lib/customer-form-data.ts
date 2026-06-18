@@ -1,7 +1,7 @@
 import { customerRecords } from "@/lib/customer-data";
 import {
-  boarderTitles,
   emptyCustomerFormValues,
+  emptyBoarderFormValues,
   type CustomerFormValues,
 } from "@/lib/customer-form-schema";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
@@ -228,11 +228,12 @@ function getRelatedPet(
 
 function normalizeBoarders(
   boarders: CustomerFormValues["boarders"],
+  minimumCount = 1,
 ): CustomerFormValues["boarders"] {
-  const nextBoarders = boarders.slice(0, boarderTitles.length);
+  const nextBoarders = [...boarders];
 
-  while (nextBoarders.length < boarderTitles.length) {
-    nextBoarders.push({ ...emptyCustomerFormValues.boarders[0] });
+  while (nextBoarders.length < Math.max(minimumCount, 1)) {
+    nextBoarders.push({ ...emptyBoarderFormValues });
   }
 
   return nextBoarders;
@@ -270,9 +271,10 @@ function buildMockCustomerDetail(identifier: string): CustomerDetailRecord | nul
       },
       boarders: normalizeBoarders(
         customer.boarders.map((name) => ({
-          ...emptyCustomerFormValues.boarders[0],
+          ...emptyBoarderFormValues,
           name,
         })),
+        customer.boarders.length,
       ),
       billing: {
         ...emptyCustomerFormValues.billing,
@@ -439,6 +441,10 @@ function buildInitialValuesFromVisit(args: {
         kennelCoughDate: toDateInput(visitPet.kennel_cough_date),
         dailyRate: toMoneyString(visitPet.daily_rate),
       })),
+      Math.max(
+        toNumber(args.visit?.boarders_booked),
+        args.visitPets.length,
+      ),
     ),
     extras: {
       grooming: "0.00",

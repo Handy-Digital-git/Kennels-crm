@@ -17,7 +17,8 @@ import {
   updateCustomerBooking,
 } from "@/app/customers/actions";
 import {
-  boarderTitles,
+  createEmptyBoarders,
+  emptyBoarderFormValues,
   emptyCustomerFormValues,
   type CustomerFormValues,
 } from "@/lib/customer-form-schema";
@@ -87,21 +88,35 @@ function formatMoneyString(value: string | undefined) {
 function hasBoarderDetails(
   boarder: CustomerFormValues["boarders"][number] | undefined,
 ) {
-  if (!boarder) {
-    return false;
-  }
+  const safeBoarder = getBoarderOrEmpty(boarder);
 
   return Boolean(
-    boarder.name.trim() ||
-      boarder.description.trim() ||
-      boarder.age.trim() ||
-      boarder.medications.trim() ||
-      boarder.specialDiet.trim() ||
-      boarder.comments.trim() ||
-      boarder.vaccinationDate.trim() ||
-      boarder.kennelCoughDate.trim() ||
-      boarder.dailyRate.trim(),
+    safeBoarder.name.trim() ||
+      safeBoarder.description.trim() ||
+      safeBoarder.age.trim() ||
+      safeBoarder.medications.trim() ||
+      safeBoarder.specialDiet.trim() ||
+      safeBoarder.comments.trim() ||
+      safeBoarder.vaccinationDate.trim() ||
+      safeBoarder.kennelCoughDate.trim() ||
+      safeBoarder.dailyRate.trim(),
   );
+}
+
+function getBoarderOrEmpty(
+  boarder: CustomerFormValues["boarders"][number] | undefined,
+) {
+  return {
+    name: boarder?.name ?? "",
+    description: boarder?.description ?? "",
+    age: boarder?.age ?? "",
+    medications: boarder?.medications ?? "",
+    specialDiet: boarder?.specialDiet ?? "",
+    comments: boarder?.comments ?? "",
+    vaccinationDate: boarder?.vaccinationDate ?? "",
+    kennelCoughDate: boarder?.kennelCoughDate ?? "",
+    dailyRate: boarder?.dailyRate ?? "",
+  };
 }
 
 function getInclusiveDays(arrivalDate: string, departureDate: string) {
@@ -130,7 +145,7 @@ function clampBoarderCount(value: string | undefined) {
     return 1;
   }
 
-  return Math.min(Math.max(parsed, 1), boarderTitles.length);
+  return Math.max(parsed, 1);
 }
 
 type NewCustomerFormProps = {
@@ -177,7 +192,13 @@ export function NewCustomerForm({
   const originalAmountPaid = formatMoneyString(initialValues.billing.amountPaid);
 
   const visibleBoarderCount = clampBoarderCount(boardersBookedValue);
-  const visibleBoarders = (boarders ?? []).slice(0, visibleBoarderCount);
+  const visibleBoarderLabels = Array.from(
+    { length: visibleBoarderCount },
+    (_, index) => `Boarder ${index + 1}`,
+  );
+  const visibleBoarders = Array.from({ length: visibleBoarderCount }, (_, index) =>
+    getBoarderOrEmpty(boarders?.[index]),
+  );
   const activeBoarders = visibleBoarders.filter(hasBoarderDetails);
   const daysInclusive = getInclusiveDays(arrivalDate, departureDate);
   const totalDailyRate = activeBoarders.reduce(
@@ -218,6 +239,15 @@ export function NewCustomerForm({
       setValue("booking.boardersBooked", nextBoardersBooked);
     }
 
+    if ((boarders?.length ?? 0) < visibleBoarderCount) {
+      const nextBoarders = [
+        ...(boarders ?? []),
+        ...createEmptyBoarders(visibleBoarderCount - (boarders?.length ?? 0)),
+      ];
+      setValue("boarders", nextBoarders);
+      return;
+    }
+
     boarders?.slice(visibleBoarderCount).forEach((boarder, index) => {
       if (!hasBoarderDetails(boarder)) {
         return;
@@ -225,7 +255,7 @@ export function NewCustomerForm({
 
       setValue(
         `boarders.${visibleBoarderCount + index}`,
-        { ...emptyCustomerFormValues.boarders[0] },
+        { ...emptyBoarderFormValues },
       );
     });
 
@@ -450,7 +480,6 @@ export function NewCustomerForm({
               {...register("booking.boardersBooked")}
               type="number"
               min="1"
-              max={boarderTitles.length}
               className={inputClassName}
             />
           </Field>
@@ -488,7 +517,7 @@ export function NewCustomerForm({
         </div>
 
         <div className="mt-6 space-y-5">
-          {boarderTitles.slice(0, visibleBoarderCount).map((title, index) => (
+          {visibleBoarderLabels.map((title, index) => (
             <div
               key={title}
               className="rounded-3xl border border-slate-200 bg-slate-50/70 p-5"
